@@ -15,8 +15,9 @@ async function fetchEventOdds(sport: string, odd: string) {
 export default async function DetailsPage({
   params,
 }: {
-  params: { sport: string; odd: string };
+  params: Promise<{ sport: string; odd: string }>;
 }) {
-  const event = await fetchEventOdds(params.sport, params.odd);
+  const { sport, odd } = await params;
+  const event = await fetchEventOdds(sport, odd);
   return <DetailsClient event={event} />;
 }
