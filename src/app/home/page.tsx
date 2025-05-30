@@ -1,10 +1,48 @@
-// src/app/home/page.tsx
-import AuthGuard from "@/components/Auth/AuthGuard";
+// src/app/home/page.tsx (Server Component)
+import HomeClient, { Sport, Event } from "./HomeClient";
 
-export default function HomePage() {
-  return (
-    <AuthGuard>
-      <div>Home</div>
-    </AuthGuard>
+const REGIONS = "us,uk,eu";
+const MARKETS = "h2h";
+
+async function fetchSports() {
+  const res = await fetch(
+    `https://api.the-odds-api.com/v4/sports/?apiKey=${process.env.API_KEY}`,
+    { cache: "no-store" }
   );
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function fetchEventsForSports(sports: Sport[]) {
+  const events: Record<string, Event[]> = {};
+
+  // Process all sports but filter those with events later
+  await Promise.all(
+    sports.map(async (sport) => {
+      try {
+        const res = await fetch(
+          `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${process.env.API_KEY}&regions=${REGIONS}&markets=${MARKETS}`,
+          { cache: "no-store" }
+        );
+        const data = await res.json();
+        console.log(data);
+        events[sport.key] = Array.isArray(data) ? data : [];
+      } catch {
+        events[sport.key] = [];
+      }
+    })
+  );
+  return events;
+}
+
+export default async function HomePage() {
+  const sports = await fetchSports();
+  const events = await fetchEventsForSports(sports);
+
+  // Filter sports that have at least one event
+  const sportsWithEvents = sports.filter(
+    (sport: Sport) => events[sport.key]?.length > 0
+  );
+
+  return <HomeClient sports={sportsWithEvents} initialEvents={events} />;
 }
