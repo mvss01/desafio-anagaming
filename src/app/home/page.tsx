@@ -1,5 +1,6 @@
 // src/app/home/page.tsx (Server Component)
-import HomeClient, { Sport, Event } from "./HomeClient";
+import HomeClient from "./HomeClient";
+import { Sport, Event } from "@/types";
 
 const REGIONS = "us,uk,eu";
 const MARKETS = "h2h";

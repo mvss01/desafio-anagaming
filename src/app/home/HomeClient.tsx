@@ -2,129 +2,11 @@
 
 import React, { useState, useCallback } from "react";
 import { uniqBy, orderBy } from "lodash";
-import { DndProvider, useDrag, useDrop } from "react-dnd";
+import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-
-export interface Sport {
-  key: string;
-  title: string;
-  group: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-export interface Event {
-  id: string;
-  sport_key: string;
-  sport_title: string;
-  commence_time: string;
-  home_team: string;
-  away_team: string;
-  bookmakers: Bookmaker[];
-}
-
-interface Bookmaker {
-  key: string;
-  title: string;
-  last_update: string;
-  markets: Market[];
-}
-
-interface Market {
-  key: string;
-  outcomes: Outcome[];
-}
-
-interface Outcome {
-  name: string;
-  price: number;
-}
-
-const ItemType = { CATEGORY: "CATEGORY" };
-
-function DraggableCategory({
-  category,
-  index,
-  moveCategory,
-  isFavorite,
-  onToggleFavorite,
-}: {
-  category: Category;
-  index: number;
-  moveCategory: (dragIndex: number, hoverIndex: number) => void;
-  isFavorite: boolean;
-  onToggleFavorite: (cat: Category) => void;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-
-  const [, drop] = useDrop({
-    accept: ItemType.CATEGORY,
-    hover(item: { index: number }, monitor) {
-      if (!ref.current) return;
-      const dragIndex = item.index;
-      const hoverIndex = index;
-
-      if (dragIndex === hoverIndex) return;
-
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-      const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      if (!clientOffset) return;
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
-
-      // Só move se cruzar a metade do item
-      if (
-        (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) ||
-        (dragIndex > hoverIndex && hoverClientY > hoverMiddleY)
-      ) {
-        return;
-      }
-
-      moveCategory(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    },
-  });
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemType.CATEGORY,
-    item: { index },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  drag(drop(ref));
-
-  return (
-    <div
-      ref={ref}
-      className={`flex items-center justify-between px-4 py-2 rounded-lg mb-2 shadow transition-all cursor-move ${
-        isDragging
-          ? "bg-green-700/40"
-          : isFavorite
-          ? "bg-green-600 text-white"
-          : "bg-green-900 text-green-200"
-      }`}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
-    >
-      <span className="font-medium">{category.name}</span>
-      <button
-        onClick={() => onToggleFavorite(category)}
-        className={`ml-4 px-2 py-1 rounded transition ${
-          isFavorite
-            ? "bg-yellow-400 text-green-900"
-            : "bg-green-800 text-yellow-300"
-        }`}
-      >
-        {isFavorite ? "★" : "☆"}
-      </button>
-    </div>
-  );
-}
+import { Bookmaker, Category, Sport, Event } from "@/types";
+import DraggableCategory from "@/components/ui/DraggableCategory";
+import { useRouter } from "next/navigation";
 
 export default function HomeClient({
   sports,
@@ -133,6 +15,7 @@ export default function HomeClient({
   sports: Sport[];
   initialEvents: Record<string, Event[]>;
 }) {
+  const router = useRouter();
   const [favorites, setFavorites] = useState<Category[]>([]);
   const [events] = useState(initialEvents);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
@@ -263,27 +146,36 @@ export default function HomeClient({
                         {isExpanded && (
                           <div className="bg-green-800/60 rounded-lg p-4 mb-4">
                             {events[cat.id]?.length ? (
-                              events[cat.id].map((event) => {
+                              events[cat.id].map((event: Event) => {
                                 const bestOdds: Record<
                                   string,
-                                  { price: number; bookmaker: string }
+                                  {
+                                    price: number;
+                                    bookmaker_title: string;
+                                    sport: string;
+                                    odd: string;
+                                  }
                                 > = {};
-                                event.bookmakers?.forEach((bookmaker) => {
-                                  bookmaker.markets?.forEach((market) => {
-                                    market.outcomes?.forEach((outcome) => {
-                                      if (
-                                        !bestOdds[outcome.name] ||
-                                        outcome.price >
-                                          bestOdds[outcome.name].price
-                                      ) {
-                                        bestOdds[outcome.name] = {
-                                          price: outcome.price,
-                                          bookmaker: bookmaker.title,
-                                        };
-                                      }
+                                event.bookmakers?.forEach(
+                                  (bookmaker: Bookmaker) => {
+                                    bookmaker.markets?.forEach((market) => {
+                                      market.outcomes?.forEach((outcome) => {
+                                        if (
+                                          !bestOdds[outcome.name] ||
+                                          outcome.price >
+                                            bestOdds[outcome.name].price
+                                        ) {
+                                          bestOdds[outcome.name] = {
+                                            price: outcome.price,
+                                            bookmaker_title: bookmaker.title,
+                                            sport: event.sport_key,
+                                            odd: event.id,
+                                          };
+                                        }
+                                      });
                                     });
-                                  });
-                                });
+                                  }
+                                );
                                 return (
                                   <div
                                     key={event.id}
@@ -306,16 +198,26 @@ export default function HomeClient({
                                       {Object.entries(bestOdds).map(
                                         ([
                                           outcomeName,
-                                          { price, bookmaker },
+                                          {
+                                            price,
+                                            bookmaker_title,
+                                            sport,
+                                            odd,
+                                          },
                                         ]) => (
                                           <span
                                             key={outcomeName}
-                                            className="bg-yellow-400 text-green-900 font-bold px-3 py-1 rounded-lg shadow flex items-center justify-center gap-1 min-w-[120px]"
-                                            title={`Melhor odd na ${bookmaker}`}
+                                            className="bg-yellow-400 text-green-900 font-bold px-3 py-1 rounded-lg shadow flex items-center justify-center gap-1 min-w-[120px] cursor-pointer"
+                                            title={`Melhor odd na ${bookmaker_title}`}
+                                            onClick={() =>
+                                              router.push(
+                                                `/details/${sport}/${odd}`
+                                              )
+                                            }
                                           >
                                             {outcomeName}: {price}{" "}
                                             <span className="text-xs text-green-700">
-                                              ({bookmaker})
+                                              ({bookmaker_title})
                                             </span>
                                           </span>
                                         )
@@ -385,7 +287,12 @@ export default function HomeClient({
                         // Map para armazenar a melhor odd por outcome
                         const bestOdds: Record<
                           string,
-                          { price: number; bookmaker: string }
+                          {
+                            price: number;
+                            bookmaker: string;
+                            oddId: string;
+                            sport: string;
+                          }
                         > = {};
 
                         event.bookmakers?.forEach((bookmaker) => {
@@ -398,6 +305,8 @@ export default function HomeClient({
                                 bestOdds[outcome.name] = {
                                   price: outcome.price,
                                   bookmaker: bookmaker.title,
+                                  oddId: event.id,
+                                  sport: event.sport_key,
                                 };
                               }
                             });
@@ -424,11 +333,17 @@ export default function HomeClient({
                             </div>
                             <div className="md:w-1/2 flex flex-wrap gap-3 mt-2 md:mt-0">
                               {Object.entries(bestOdds).map(
-                                ([outcomeName, { price, bookmaker }]) => (
+                                ([
+                                  outcomeName,
+                                  { price, bookmaker, oddId, sport },
+                                ]) => (
                                   <span
                                     key={outcomeName}
-                                    className="bg-yellow-400 text-green-900 font-bold px-3 py-1 rounded-lg shadow flex items-center gap-1"
+                                    className="bg-yellow-400 text-green-900 font-bold px-3 py-1 rounded-lg shadow flex items-center gap-1 cursor-pointer"
                                     title={`Melhor odd na ${bookmaker}`}
+                                    onClick={() =>
+                                      router.push(`/details/${sport}/${oddId}`)
+                                    }
                                   >
                                     {outcomeName}: {price}{" "}
                                     <span className="text-xs text-green-700">

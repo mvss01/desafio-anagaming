@@ -37,10 +37,9 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
 
   const user: User | null = session?.user
     ? {
-        id: session.user.id || "",
+        id: (session.user as User).id || "",
         name: session.user.name || "",
         email: session.user.email || "",
-        avatar: session.user.image || undefined,
       }
     : null;
 

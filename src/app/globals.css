@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+/* Para navegadores baseados em Webkit (Chrome, Edge, Safari) */
+.bg-green-900\/60::-webkit-scrollbar {
+  width: 8px;
+}
+
+.bg-green-900\/60::-webkit-scrollbar-track {
+  background: #14532d; /* tom escuro de verde */
+  border-radius: 8px;
+}
+
+.bg-green-900\/60::-webkit-scrollbar-thumb {
+  background: #22c55e; /* verde mais claro */
+  border-radius: 8px;
+  border: 2px solid #14532d;
+}
+
+.bg-green-900\/60::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}

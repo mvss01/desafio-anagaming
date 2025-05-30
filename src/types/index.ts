@@ -2,69 +2,43 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    avatar?: string;
 }
 
-export interface SportCategory {
+export interface Sport {
+    key: string;
+    title: string;
+    group: string;
+}
+
+export interface Category {
     id: string;
     name: string;
-    icon: string;
-    color: string;
-    isActive: boolean;
 }
 
-export interface Team {
+export interface Event {
     id: string;
+    sport_key: string;
+    sport_title: string;
+    commence_time: string;
+    home_team: string;
+    away_team: string;
+    bookmakers: Bookmaker[];
+}
+
+export interface Bookmaker {
+    key: string;
+    title: string;
+    last_update: string;
+    markets: Market[];
+}
+
+export interface Market {
+    key: string;
+    last_update: string;
+    outcomes: Outcome[];
+}
+
+export interface Outcome {
     name: string;
-    logo?: string;
-    country?: string;
-}
-
-export interface Match {
-    id: string;
-    homeTeam: Team;
-    awayTeam: Team;
-    date: string;
-    time: string;
-    status: "upcoming" | "live" | "finished";
-    category: string;
-    league: string;
-    odds: {
-        home: number;
-        draw?: number;
-        away: number;
-    };
-}
-
-export interface Odd {
-    id: string;
-    match: Match;
-    bookmaker: string;
-    homeOdd: number;
-    drawOdd?: number;
-    awayOdd: number;
-    margin: number;
-    lastUpdated: string;
-}
-
-export interface FavoriteCategory {
-    id: string;
-    categoryId: string;
-    order: number;
-}
-
-// Extend NextAuth types
-declare module "next-auth" {
-    interface Session {
-        user: {
-            id: string;
-            name?: string | null;
-            email?: string | null;
-            image?: string | null;
-        };
-    }
-
-    interface User {
-        id: string;
-    }
+    price: number;
 }
