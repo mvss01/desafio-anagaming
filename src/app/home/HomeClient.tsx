@@ -302,7 +302,7 @@ export default function HomeClient({
                                         ).toLocaleString("pt-BR")}
                                       </span>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-2 md:mt-0">
+                                    <div className="grid grid-cols-1 gap-3 mt-2 md:mt-0">
                                       {Object.entries(bestOdds).map(
                                         ([
                                           outcomeName,
