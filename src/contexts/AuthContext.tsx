@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, ReactNode } from "react";
+import React, { createContext, useContext, ReactNode, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { User } from "@/types";
 
@@ -8,6 +8,7 @@ interface AuthContextType {
   login: () => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +29,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
   const { data: session, status } = useSession();
+  const [isLoading, setIsLoading] = useState(status === "loading");
+
+  React.useEffect(() => {
+    setIsLoading(status === "loading");
+  }, [status]);
 
   const user: User | null = session?.user
     ? {
@@ -38,18 +44,25 @@ const AuthProviderInner: React.FC<AuthProviderProps> = ({ children }) => {
       }
     : null;
 
+  const isAuthenticated = !!user;
+
   const login = async (): Promise<void> => {
-    await signIn("github");
+    setIsLoading(true);
+    try {
+      await signIn("github", { callbackUrl: "/home" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
     signOut();
   };
 
-  const isLoading = status === "loading";
-
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, isLoading, isAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );
