@@ -1,6 +1,5 @@
-// components/LoginCard.tsx
 import React, { ReactNode } from "react";
-import { FaCrown } from "react-icons/fa"; // Ícone de coroa para reforçar o tema
+import { FaCrown } from "react-icons/fa";
 
 interface CardProps {
   title: string;
@@ -37,5 +36,3 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, children }) => (
     <div className="bg-black/40 p-4 rounded-xl shadow-inner">{children}</div>
   </div>
 );
-
-// Adicione estas animações ao seu Tailwind config ou use styles globais:

@@ -1,9 +1,11 @@
-// src/app/home/page.tsx (Server Component)
 import HomeClient from "./HomeClient";
+<<<<<<< Updated upstream
 import { Sport, Event } from "@/types";
 
 const REGIONS = "us,uk,eu";
 const MARKETS = "h2h";
+=======
+>>>>>>> Stashed changes
 
 async function fetchSports() {
   const res = await fetch(
@@ -14,6 +16,7 @@ async function fetchSports() {
   return res.json();
 }
 
+<<<<<<< Updated upstream
 async function fetchEventsForSports(sports: Sport[]) {
   const events: Record<string, Event[]> = {};
 
@@ -46,4 +49,9 @@ export default async function HomePage() {
   );
 
   return <HomeClient sports={sportsWithEvents} initialEvents={events} />;
+=======
+export default async function HomePage() {
+  const sports = await fetchSports();
+  return <HomeClient sports={sports} />;
+>>>>>>> Stashed changes
 }

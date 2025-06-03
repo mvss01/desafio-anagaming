@@ -21,7 +21,14 @@ export default function HomeClient({
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
+<<<<<<< Updated upstream
   // Prepare categories from sports
+=======
+  const [loadingEvents, setLoadingEvents] = useState<Record<string, boolean>>(
+    {}
+  );
+
+>>>>>>> Stashed changes
   const categories: Category[] = sports.map((s) => ({
     id: s.key,
     name: s.title,
@@ -39,11 +46,36 @@ export default function HomeClient({
     });
   }, []);
 
+<<<<<<< Updated upstream
   // Favoritar/desfavoritar
   const toggleFavorite = useCallback(
     (cat: Category) => {
       setFavorites((prev) =>
         prev.find((c) => c.id === cat.id)
+=======
+  const toggleExpandCategory = useCallback(
+    (id: string) => {
+      setExpandedCategories((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) {
+          newSet.delete(id);
+        } else {
+          newSet.add(id);
+          if (!events[id]) fetchEvents(id);
+        }
+        return newSet;
+      });
+    },
+    [events, fetchEvents]
+  );
+
+  const toggleFavorite = useCallback(
+    (cat: Category) => {
+      setFavorites((prev) => {
+        const isFav = prev.find((c) => c.id === cat.id);
+        if (!isFav && !events[cat.id]) fetchEvents(cat.id);
+        return isFav
+>>>>>>> Stashed changes
           ? prev.filter((c) => c.id !== cat.id)
           : uniqBy([...prev, cat], "id")
       );
@@ -51,7 +83,6 @@ export default function HomeClient({
     [setFavorites]
   );
 
-  // Drag and drop handler
   const moveFavorite = useCallback(
     (from: number, to: number) => {
       setFavorites((prev) => {

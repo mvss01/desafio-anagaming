@@ -36,7 +36,6 @@ export default function DraggableCategory({
       if (!clientOffset) return;
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
 
-      // Só move se cruzar a metade do item
       if (
         (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) ||
         (dragIndex > hoverIndex && hoverClientY > hoverMiddleY)
