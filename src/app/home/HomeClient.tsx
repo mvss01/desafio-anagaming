@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { uniqBy, orderBy } from "lodash";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -11,6 +11,36 @@ import { useRouter } from "next/navigation";
 export default function HomeClient({ sports }: { sports: Sport[] }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState<Category[]>([]);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("favorites");
+      if (stored) {
+        try {
+          setFavorites(JSON.parse(stored));
+        } catch {
+          setFavorites([]);
+        }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    }
+  }, [favorites]);
+
+  useEffect(() => {
+    if (favorites.length > 0) {
+      favorites.forEach((fav) => {
+        if (!events[fav.id]) {
+          fetchEvents(fav.id);
+        }
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites]);
+
   const [events, setEvents] = useState<Record<string, Event[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
