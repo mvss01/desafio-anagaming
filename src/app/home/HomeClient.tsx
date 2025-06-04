@@ -8,51 +8,37 @@ import { Bookmaker, Category, Sport, Event } from "@/types";
 import DraggableCategory from "@/components/ui/DraggableCategory";
 import { useRouter } from "next/navigation";
 
-export default function HomeClient({
-  sports,
-  initialEvents,
-}: {
-  sports: Sport[];
-  initialEvents: Record<string, Event[]>;
-}) {
+export default function HomeClient({ sports }: { sports: Sport[] }) {
   const router = useRouter();
   const [favorites, setFavorites] = useState<Category[]>([]);
-  const [events] = useState(initialEvents);
+  const [events, setEvents] = useState<Record<string, Event[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
     new Set()
   );
-<<<<<<< Updated upstream
-  // Prepare categories from sports
-=======
+
   const [loadingEvents, setLoadingEvents] = useState<Record<string, boolean>>(
     {}
   );
 
->>>>>>> Stashed changes
   const categories: Category[] = sports.map((s) => ({
     id: s.key,
     name: s.title,
   }));
 
-  const toggleExpandCategory = useCallback((id: string) => {
-    setExpandedCategories((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
+  const fetchEvents = useCallback(async (sportKey: string) => {
+    setLoadingEvents((prev) => ({ ...prev, [sportKey]: true }));
+    try {
+      const res = await fetch(`/api/events/${sportKey}`);
+      const data = await res.json();
+      setEvents((prev) => ({
+        ...prev,
+        [sportKey]: Array.isArray(data) ? data : [],
+      }));
+    } finally {
+      setLoadingEvents((prev) => ({ ...prev, [sportKey]: false }));
+    }
   }, []);
 
-<<<<<<< Updated upstream
-  // Favoritar/desfavoritar
-  const toggleFavorite = useCallback(
-    (cat: Category) => {
-      setFavorites((prev) =>
-        prev.find((c) => c.id === cat.id)
-=======
   const toggleExpandCategory = useCallback(
     (id: string) => {
       setExpandedCategories((prev) => {
@@ -69,18 +55,18 @@ export default function HomeClient({
     [events, fetchEvents]
   );
 
+  // Favoritar/desfavoritar
   const toggleFavorite = useCallback(
     (cat: Category) => {
       setFavorites((prev) => {
         const isFav = prev.find((c) => c.id === cat.id);
         if (!isFav && !events[cat.id]) fetchEvents(cat.id);
         return isFav
->>>>>>> Stashed changes
           ? prev.filter((c) => c.id !== cat.id)
-          : uniqBy([...prev, cat], "id")
-      );
+          : uniqBy([...prev, cat], "id");
+      });
     },
-    [setFavorites]
+    [events, fetchEvents]
   );
 
   const moveFavorite = useCallback(
@@ -176,7 +162,11 @@ export default function HomeClient({
                         </div>
                         {isExpanded && (
                           <div className="bg-green-800/60 rounded-lg p-4 mb-4">
-                            {events[cat.id]?.length ? (
+                            {loadingEvents[cat.id] ? (
+                              <div className="text-green-400">
+                                Carregando jogos...
+                              </div>
+                            ) : events[cat.id]?.length ? (
                               events[cat.id].map((event: Event) => {
                                 const bestOdds: Record<
                                   string,
@@ -305,7 +295,11 @@ export default function HomeClient({
                 </div>
               ) : (
                 favorites.map((fav) =>
-                  (events[fav.id] || []).length === 0 ? (
+                  loadingEvents[fav.id] ? (
+                    <div key={fav.id} className="text-green-400 mb-4">
+                      Carregando jogos...
+                    </div>
+                  ) : (events[fav.id] || []).length === 0 ? (
                     <div key={fav.id} className="text-green-400 mb-4">
                       Nenhum jogo encontrado para {fav.name}.
                     </div>
