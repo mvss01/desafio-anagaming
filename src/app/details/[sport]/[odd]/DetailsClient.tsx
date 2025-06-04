@@ -2,6 +2,7 @@
 
 import { Event } from "@/types";
 import React from "react";
+import Image from "next/image";
 
 export default function DetailsClient({ event }: { event: Event | null }) {
   if (!event) {
@@ -26,23 +27,13 @@ export default function DetailsClient({ event }: { event: Event | null }) {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-green-900 py-10 px-4 flex flex-col items-center">
       {/* Header */}
       <div className="flex flex-col items-center mb-4">
-        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 shadow-lg mb-2">
-          <svg width="36" height="36" viewBox="0 0 32 32">
-            <circle cx="16" cy="16" r="14" fill="#fff" />
-            <text
-              x="50%"
-              y="55%"
-              textAnchor="middle"
-              fill="#16a34a"
-              fontSize="14"
-              fontWeight="bold"
-              dy=".3em"
-              fontFamily="Arial"
-            >
-              BET
-            </text>
-          </svg>
-        </div>
+        <Image
+          src="/bet.svg"
+          alt="Bet Logo"
+          width={64}
+          height={64}
+          className="mb-2"
+        />
         <span className="text-2xl font-bold text-white tracking-wide">
           Detalhes da Odd
         </span>

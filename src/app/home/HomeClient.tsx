@@ -7,6 +7,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Bookmaker, Category, Sport, Event } from "@/types";
 import DraggableCategory from "@/components/ui/DraggableCategory";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function HomeClient({ sports }: { sports: Sport[] }) {
   const router = useRouter();
@@ -117,23 +118,13 @@ export default function HomeClient({ sports }: { sports: Sport[] }) {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8 flex flex-col items-center">
-            <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-600 shadow-lg mb-2">
-              <svg width="36" height="36" viewBox="0 0 32 32">
-                <circle cx="16" cy="16" r="14" fill="#fff" />
-                <text
-                  x="50%"
-                  y="55%"
-                  textAnchor="middle"
-                  fill="#16a34a"
-                  fontSize="14"
-                  fontWeight="bold"
-                  dy=".3em"
-                  fontFamily="Arial"
-                >
-                  BET
-                </text>
-              </svg>
-            </div>
+            <Image
+              src="/bet.svg"
+              alt="Bet Logo"
+              width={64}
+              height={64}
+              className="mb-2"
+            />
             <span className="text-2xl font-bold text-white tracking-wide">
               Bem-vindo à Plataforma de Odds Esportivas
             </span>

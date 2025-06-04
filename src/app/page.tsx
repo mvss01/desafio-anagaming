@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Spin from "@/components/ui/spin";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Login: React.FC = () => {
   const { login, isLoading, isAuthenticated } = useAuth();
@@ -23,23 +24,13 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 to-green-900">
       <div className="flex flex-col items-center mb-8">
-        <div className="w-14 h-14 flex items-center justify-center rounded-full bg-green-600 shadow-lg mb-2">
-          <svg width="32" height="32" viewBox="0 0 32 32">
-            <circle cx="16" cy="16" r="14" fill="#fff" />
-            <text
-              x="50%"
-              y="55%"
-              textAnchor="middle"
-              fill="#16a34a"
-              fontSize="14"
-              fontWeight="bold"
-              dy=".3em"
-              fontFamily="Arial"
-            >
-              BET
-            </text>
-          </svg>
-        </div>
+        <Image
+          src="/bet.svg"
+          alt="Bet Logo"
+          width={64}
+          height={64}
+          className="mb-2"
+        />
         <span className="text-xl font-bold text-white tracking-wide">
           ANA Gaming
         </span>
